@@ -92,6 +92,7 @@ dat = rowbind(dat)
 
 # save dat as csv file. 
 write.table(dat,file="data/Amaranth_tricot.csv",  append=FALSE, sep= "," , row.names = FALSE, col.names=TRUE)
+
 # keep dat for preserving the original data 
 keep_dat <- dat
 
@@ -150,7 +151,7 @@ changed_names<- gsub("transplantation", "transplanting", changed_names)
 # change french name to english!!    
 # transplanting =  transplantation
 changed_names<- gsub("transplantation", "transplanting", changed_names)
-
+ 
 # change french name to english!!    
 # nursery =  pepiniere
 changed_names<- gsub("pepiniere", "nursery", changed_names)
