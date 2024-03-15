@@ -45,8 +45,10 @@ traits = unlist(traits)
 
 traitlabels = fix_trait_labels(traits)
 
+traitlabels
+
 trait_list = getTraitList(dat,
-                          pattern = c("_best", "_worst"),
+                          pattern = c("_pos", "_neg"),
                           trait.labels = traitlabels)
 
 #.....................................
@@ -56,9 +58,12 @@ trait_list = getTraitList(dat,
 # removing the least correlated traits then, using the 
 # selected traits run splitting by men and women
 # an index for the packages 
-pack_index = paste0("variety", letters[1:3])
+names(dat)
+pack_index = paste0("package_item_", letters[1:3])
 
 itemnames = sort(unique(unlist(dat[, pack_index])))
+
+itemnames
 
 R = lapply(trait_list, function(x){
   rank_tricot(data = dat,
@@ -76,103 +81,112 @@ cbind(traits, unlist(lapply(trait_list, function(x) sum(x$keep))))
 ### Backward selection to get the significant traits with p < 0.05 #######
 true = TRUE
 traits_to_keep = traitlabels
-reference = which(grepl("Choice For Replant", traits_to_keep))
+traitlabels
+reference_trait = "Fourth Harvest - Overall Performance"
+reference = which(grepl(reference_trait, traits_to_keep))
 reference
-pval = 0.05
+pval = 0.1
 R_to_backward = R
 iteration = 1
 
+# # simple kendall correlation
+# kendall = lapply(R[-reference], function(x){
+#   kendallTau(x, R[[reference]])
+# })
+# 
+# kendall = do.call("rbind", kendall)
+# 
+# kendall$trait = traitlabels[-reference]
+# 
+# keep = kendall$`Pr(>|z|)` < pval
+# 
+# 
+# kendall = kendall[keep, ]
+# 
+# 
+# while(true) {
+# 
+#   cat("Iteration num.", iteration, "\n")
+# 
+#   rN = kendallTauCorMatrix(R_to_backward)
+# 
+#   r = rN[[1]]
+# 
+#   N = rN[[2]]
+# 
+#   # Test with the full matrix, just to see if it works
+#   pr = cor2pcor(r)
+# 
+#   # Simple way to work with these values is to convert to Pearson's r
+#   r_pearson = sin(3.141592654 * r * .5)
+# 
+#   dimnames(r_pearson) = list(traits_to_keep, traits_to_keep)
+# 
+#   #calculate pearson correlation P-value
+#   ttv = list()
+#   ttest_pvalue_matrix = matrix(NA, 
+#                                nrow = length(traits_to_keep), 
+#                                ncol = length(traits_to_keep))
+# 
+#   # Fill the matrix
+#   for(i in seq_along(traits_to_keep)){
+#     for (j in seq_along(traits_to_keep)){ #Fills lower triangle only, to avoid calculating the same value twice
+#       keep_tt = r_pearson[j,i] *sqrt((mean(N) - 2)/ (1-(r_pearson[j,i]^2)))
+#       ttv = keep_tt
+#       keep_tt_value = 2 * (pt(-abs(ttv), mean(N) - 2))
+#       ttest_pvalue_matrix[j,i] = keep_tt_value
+#     }
+#   }
+# 
+#   # get pvalues compared to the reference trait
+#   pvalues = ttest_pvalue_matrix[, reference]
+# 
+#   # check if any pvalue is higher than the threshold
+#   true = any(pvalues > pval)
+# 
+#   if (true) {
+#     # remove the trait with higher pvalue
+#     max_pvalue = which.max(pvalues)
+# 
+#     traits_to_keep = traits_to_keep[-max_pvalue]
+# 
+#     R_to_backward = R_to_backward[-max_pvalue]
+# 
+#     reference = which(grepl(reference_trait, traits_to_keep))
+# 
+#     iteration = iteration + 1
+#   }
+# }
+# 
+# cor_backward = data.frame(trait = traits_to_keep,
+#                           cor = r_pearson[, reference],
+#                           pval = ttest_pvalue_matrix[, reference])
+# 
+# 
+# cor_backward = separate(cor_backward,
+#                         "trait",
+#                         c("cropstage", "croptrait"),
+#                         sep = " - ",
+#                         remove = FALSE)
+# 
+# cor_backward = cor_backward[cor_backward$cor > 0, ]
+# 
+# drop = grepl(reference_trait, cor_backward$trait)
+# 
+# cor_backward[drop, "cor"] = NA
+# 
+# cor_backward = na.omit(cor_backward)
+# 
+# write.csv(cor_backward,
+#           "output/kendall-partial-correlation-backward-selection.csv",
+#           row.names = FALSE)
 
-kendall = lapply(R[-reference], function(x){
-  kendallTau(x, R[[reference]])
-})
-
-kendall = do.call("rbind", kendall)
-
-kendall$trait = traitlabels[-reference]
-
-while(true) {
-
-  cat("Iteration num.", iteration, "\n")
-
-  rN = kendallTauCorMatrix(R_to_backward)
-
-  r = rN[[1]]
-
-  N = rN[[2]]
-
-  # Test with the full matrix, just to see if it works
-  pr = cor2pcor(r)
-
-  # Simple way to work with these values is to convert to Pearson's r
-  r_pearson = sin(3.141592654 * r * .5)
-
-  dimnames(r_pearson) = list(traits_to_keep, traits_to_keep)
-
-  #calculate pearson correlation P-value
-  ttv = list()
-  ttest_pvalue_matrix = matrix(NA, nrow = length(traits_to_keep), ncol = length(traits_to_keep))
-
-  # Fill the matrix
-  for(i in seq_along(traits_to_keep)){
-    for (j in seq_along(traits_to_keep)){ #Fills lower triangle only, to avoid calculating the same value twice
-      keep_tt = r_pearson[j,i] *sqrt((mean(N) - 2)/ (1-(r_pearson[j,i]^2)))
-      ttv = keep_tt
-      keep_tt_value = 2 * (pt(-abs(ttv), mean(N) - 2))
-      ttest_pvalue_matrix[j,i] = keep_tt_value
-    }
-  }
-
-  # get pvalues compared to the reference trait
-  pvalues = ttest_pvalue_matrix[, reference]
-
-  # check if any pvalue is higher than the threshold
-  true = any(pvalues > pval)
-
-  if (true) {
-    # remove the trait with higher pvalue
-    max_pvalue = which.max(pvalues)
-
-    traits_to_keep = traits_to_keep[-max_pvalue]
-
-    R_to_backward = R_to_backward[-max_pvalue]
-
-    reference = which(grepl("Choice For Replant", traits_to_keep))
-
-    iteration = iteration + 1
-  }
-}
-
-cor_backward = data.frame(trait = traits_to_keep,
-                          cor = r_pearson[, reference],
-                          pval = ttest_pvalue_matrix[, reference])
-
-
-cor_backward = separate(cor_backward,
-                        "trait",
-                        c("cropstage", "croptrait"),
-                        sep = " - ",
-                        remove = FALSE)
-
-cor_backward = cor_backward[cor_backward$cor > 0, ]
-
-drop = grepl("Choice For Replant", cor_backward$trait)
-
-cor_backward[drop, "cor"] = NA
-
-cor_backward = na.omit(cor_backward)
-
-write.csv(cor_backward,
-          "output/kendall-partial-correlation-backward-selection.csv",
-          row.names = FALSE)
-
-# cor_backward = read.csv("output/kendall-partial-correlation-backward-selection.csv")
-
-# retain only the traits with correlation higher than 0.3
-cor_backward = cor_backward[cor_backward$cor >= 0.3, ]
+cor_backward = read.csv("output/kendall-partial-correlation-backward-selection.csv")
 
 cor_backward$cropstage = factor(cor_backward$cropstage, 
-                                levels = rev(unique(cor_backward$cropstage)))
+                                levels = c('Reproductive',
+                                           'Third Harvest',
+                                           'Fourth Harvest'))
 cor_backward$cropstage
 
 cor_backward = cor_backward[order(cor_backward$cor), ]
@@ -197,7 +211,7 @@ cor_plot =
                                '#238b45','#006d2c','#00441b')) +
   theme_minimal() +
   theme(panel.grid.major = element_blank(),
-        strip.background =element_rect(fill="white"),
+        strip.background = element_rect(fill="white"),
         text = element_text(color = "grey10"),
         strip.text.y = element_blank(),
         legend.position = "right",
@@ -207,7 +221,7 @@ cor_plot =
         axis.title = element_text(size = 16, color = "grey10"),
         legend.title = element_blank()) +
   labs(x = "",
-       y = "Kendal rank correlation with Choice for Replanting")
+       y = "Kendal rank correlation with Overall Performance")
 
 cor_plot
 
@@ -220,9 +234,17 @@ ggsave("output/kendall-tau-partial-correlation-all.pdf",
 # ..................................
 # Split by gender ####
 # partial correlation with gender using traits selected in backward process
-gender = unique(na.omit(dat$sex))
+gender = unique(na.omit(dat$registration_gender))
 
-trait_keep = traitlabels %in% union(cor_backward$trait, "Final Evaluation - Choice For Replant")
+dat$gender = dat$registration_gender
+
+dat$gender[dat$gender=="Homme"] = "Man"
+
+dat$gender[dat$gender=="Femme"] = "Woman"
+
+table(dat$gender)
+
+trait_keep = traitlabels %in% union(cor_backward$trait, reference_trait)
 
 trait_sel = traitlabels[trait_keep]
 
@@ -230,14 +252,16 @@ R_sel = R[trait_keep]
 
 trait_sel_string = gsub(" ", "", trait_sel)
 
-reference_trait = which(grepl("Choice For Replant", trait_sel))
+reference_trait = which(grepl(reference_trait, trait_sel))
  
 trait_cor = data.frame()
+
+R_sel[[2]]
 
 for (g in seq_along(gender)) {
 
   Rg = lapply(R_sel, function(x){
-    x[dat$sex == gender[g],]
+    x[dat$gender == gender[g],]
   })
 
   rN = kendallTauCorMatrix(Rg)

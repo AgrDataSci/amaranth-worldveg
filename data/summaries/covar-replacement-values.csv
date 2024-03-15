@@ -1,0 +1,74 @@
+﻿covar,name,new_name
+registration_gender,Femme,Woman
+registration_gender,Homme,Man
+registration_gender,Man,Man
+registration_gender,Woman,Woman
+registration_occupation,Agriculture,Farming
+registration_occupation,Ménagère,Farming
+registration_occupation,Autre,Other
+registration_occupation,NA,
+registration_occupation,"Travailleur Indépendant Hors Ferme,  -autre)",Self-employed-off Farm
+registration_occupation,Emploi Salarié,Salaried Employment
+registration_occupation,Farming,Farming
+registration_occupation,Salaried Employment,Salaried Employment
+registration_occupation,Self-employed-off Farm,Self-employed-off Farm
+registration_reading,Non,No
+registration_reading,Oui,Yes
+registration_reading,NA,
+registration_reading,No,No
+registration_reading,Yes,Yes
+registration_typeofhh,"Famille Nucléaire (deux Parents Et Les Enfants, éventuellement Avec Les Grands-parents)",Nuclear Family (two Parents And Children Possibly With Grandparents)
+registration_typeofhh,Famille Polygamee (le Chef De Famille Marié à Au Moins Deux Femmes Et A Des Enfants),"Polygamous Family (more Than Two Female Parents And Children, Possibly With Grandparents)"
+registration_typeofhh,NA,
+registration_typeofhh,"Famille Monoparentale (un Parent Avec Enfants, éventuellement Avec Grands-parents)","Single-parent Family (one Parent With Children, Possibly With Grandparents)"
+registration_typeofhh,Nuclear Family (two Parents And Children Possibly With Grandparents),Nuclear Family (two Parents And Children Possibly With Grandparents)
+registration_typeofhh,"Single-parent Family (one Parent With Children, Possibly With Grandparents)","Single-parent Family (one Parent With Children, Possibly With Grandparents)"
+registration_typeofhh,"Polygamous Family (more Than Two Female Parents And Children, Possibly With Grandparents)","Polygamous Family (more Than Two Female Parents And Children, Possibly With Grandparents)"
+registration_landrights,Autres – Précisez,Other
+registration_landrights,Héritage,Inheritance
+registration_landrights,Don,Gifting
+registration_landrights,NA,
+registration_landrights,Achat,Purchasing
+registration_landrights,Inheritance,Inheritance
+registration_landrights,Purchasing,Purchasing
+registration_landrights,Other,Other
+registration_landrights,Purchasing; Other,Purchasing
+registration_landrights,Gifting,Gifting
+registration_landrights,Inheritance; Other,Inheritance
+registration_landrights,Other; Purchasing,Purchasing
+registration_landrights,Other; Inheritance,Inheritance
+registration_landirrigation,Oui,Yes
+registration_landirrigation,NA,
+registration_landirrigation,Non,No
+registration_landirrigation,Yes,Yes
+registration_landirrigation,No,No
+registration_whocontrolprod,Femme,Woman
+registration_whocontrolprod,Les Deux,Both
+registration_whocontrolprod,NA,
+registration_whocontrolprod,Homme,Man
+registration_whocontrolprod,Other,Other
+registration_whocontrolprod,Both,Both
+registration_whocontrolprod,Woman,Woman
+registration_whocontrolprod,Man,Man
+registration_whocontrolsell,Femme,Woman
+registration_whocontrolsell,Les Deux,Both
+registration_whocontrolsell,Other,Other
+registration_whocontrolsell,NA,
+registration_whocontrolsell,Homme,Man
+registration_whocontrolsell,Man,Man
+registration_whocontrolsell,Woman,Woman
+registration_whocontrolsell,Both,Both
+registration_whocontrolexchange,Femme,Woman
+registration_whocontrolexchange,NA,
+registration_whocontrolexchange,Les Deux,Both
+registration_whocontrolexchange,Homme,Man
+registration_whocontrolexchange,Autre,Other
+registration_whocontrolexchange,Both,Both
+registration_whocontrolexchange,Woman,Woman
+registration_whocontrolexchange,Man,Man
+registration_whocontrolexchange,Other,Other
+registration_extensionservice,Oui,Yes
+registration_extensionservice,NA,
+registration_extensionservice,Non,No
+registration_extensionservice,Yes,Yes
+registration_extensionservice,No,No

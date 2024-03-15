@@ -1,0 +1,79 @@
+$cross_table
+       covar[, chars[i]]
+country Nuclear Family (two Parents And Children Possibly With Grandparents)
+  BJ                                                                     486
+  ML                                                                     153
+  TZ                                                                     203
+  Total                                                                  842
+       covar[, chars[i]]
+country Polygamous Family (more Than Two Female Parents And Children, Possibly With Grandparents)
+  BJ                                                                                          122
+  ML                                                                                          391
+  TZ                                                                                           10
+  Total                                                                                       523
+       covar[, chars[i]]
+country Single-parent Family (one Parent With Children, Possibly With Grandparents) Total
+  BJ                                                                             50   658
+  ML                                                                            130   674
+  TZ                                                                             87   300
+  Total                                                                         267  1632
+
+$proportions
+      Nuclear Family (two Parents And Children Possibly With Grandparents)
+BJ                                                               0.7386018
+ML                                                               0.2270030
+TZ                                                               0.6766667
+Total                                                            0.5159314
+      Polygamous Family (more Than Two Female Parents And Children, Possibly With Grandparents)
+BJ                                                                                   0.18541033
+ML                                                                                   0.58011869
+TZ                                                                                   0.03333333
+Total                                                                                0.32046569
+      Single-parent Family (one Parent With Children, Possibly With Grandparents) Total
+BJ                                                                     0.07598784     1
+ML                                                                     0.19287834     1
+TZ                                                                     0.29000000     1
+Total                                                                  0.16360294     1
+
+$Man
+Cross-Tabulation, Row Proportions  
+covar$country * covar[, chars[i]]  
+Group: covar$gender = Man  
+
+
+--------------- ------------------- ---------------------------------------------------------------------- ------------------------------------------------------------------------------------------- ----------------------------------------------------------------------------- --------------
+                  covar[, chars[i]]   Nuclear Family (two Parents And Children Possibly With Grandparents)   Polygamous Family (more Than Two Female Parents And Children, Possibly With Grandparents)   Single-parent Family (one Parent With Children, Possibly With Grandparents)          Total
+  covar$country                                                                                                                                                                                                                                                                                    
+             BJ                                                                                323 (72.3%)                                                                                  98 (21.9%)                                                                    26 ( 5.8%)   447 (100.0%)
+             ML                                                                                 27 (29.3%)                                                                                  47 (51.1%)                                                                    18 (19.6%)    92 (100.0%)
+             TZ                                                                                139 (66.5%)                                                                                   8 ( 3.8%)                                                                    62 (29.7%)   209 (100.0%)
+          Total                                                                                489 (65.4%)                                                                                 153 (20.5%)                                                                   106 (14.2%)   748 (100.0%)
+--------------- ------------------- ---------------------------------------------------------------------- ------------------------------------------------------------------------------------------- ----------------------------------------------------------------------------- --------------
+
+----------------------------
+ Chi.squared   df   p.value 
+------------- ---- ---------
+  151.7819     4       0    
+----------------------------
+
+$Woman
+Cross-Tabulation, Row Proportions  
+covar$country * covar[, chars[i]]  
+Group: covar$gender = Woman  
+
+
+--------------- ------------------- ---------------------------------------------------------------------- ------------------------------------------------------------------------------------------- ----------------------------------------------------------------------------- --------------
+                  covar[, chars[i]]   Nuclear Family (two Parents And Children Possibly With Grandparents)   Polygamous Family (more Than Two Female Parents And Children, Possibly With Grandparents)   Single-parent Family (one Parent With Children, Possibly With Grandparents)          Total
+  covar$country                                                                                                                                                                                                                                                                                    
+             BJ                                                                                163 (77.3%)                                                                                  24 (11.4%)                                                                    24 (11.4%)   211 (100.0%)
+             ML                                                                                126 (21.6%)                                                                                 344 (59.1%)                                                                   112 (19.2%)   582 (100.0%)
+             TZ                                                                                 64 (70.3%)                                                                                   2 ( 2.2%)                                                                    25 (27.5%)    91 (100.0%)
+          Total                                                                                353 (39.9%)                                                                                 370 (41.9%)                                                                   161 (18.2%)   884 (100.0%)
+--------------- ------------------- ---------------------------------------------------------------------- ------------------------------------------------------------------------------------------- ----------------------------------------------------------------------------- --------------
+
+----------------------------
+ Chi.squared   df   p.value 
+------------- ---- ---------
+  275.8184     4       0    
+----------------------------
+
