@@ -44,6 +44,24 @@ itemnames = sort(unique(unlist(dat[, pack_index])))
 
 itemnames
 
+t(table(rep(dat$package_country, times = 3), unlist(dat[pack_index])))
+
+net = dat[, pack_index]
+
+net$best = "A"
+net$worst = "C"
+
+r = rank_tricot(net, pack_index, c("best", "worst"))
+
+plot(network(r))
+
+
+pdf(file = "output/trial-network.pdf",
+    width = 9,
+    height = 9)
+plot(network(r))
+dev.off()
+
 # .......................................
 # .......................................
 # select traits ####
@@ -232,7 +250,8 @@ covar$Cluster[covar$Cluster == 4] = 3
 
 table(covar$Cluster)
 
-covar_clust = covar[c("Cluster", 'gender', 'whocontrolsell', "age", "incomecropshare", "experiencecrop")]
+covar_clust = covar[c("Cluster", 'gender', 'whocontrolsell', "age", 
+                      "incomecropshare", "experiencecrop")]
 
 # .....................................
 # .....................................
@@ -325,6 +344,22 @@ table(covar_clust$Cluster, covar_clust$whocontrolprod)
 
 # ..............................
 # ..............................
+# labels to clusters from chatGPT
+clust_labs = c("Empowered Women Farmers",
+               "Experienced Men Farmers",
+               "Rising Men Entrepreneurs",
+               "Innovative Women Farmers")
+
+covar_clust$clust = covar_clust$Cluster
+
+covar_clust$Cluster = factor(covar_clust$clust, labels = clust_labs)
+
+covar_clust$Cluster = factor(covar_clust$Cluster, levels = c("Empowered Women Farmers",
+                                                             "Innovative Women Farmers",
+                                                             "Experienced Men Farmers",
+                                                             "Rising Men Entrepreneurs"))
+
+table(covar_clust$Cluster)
 
 # ........................................
 # .......................................
@@ -379,9 +414,9 @@ names(coeffs)[-1] = labels
 
 pc = princomp(coeffs[-1], cor = FALSE)
 
-# pc_labs = as.data.frame(pc$scores[,c(1,2)])
-# pc_labs$item = coeffs$item
-# pc_labs = pc_labs[!duplicated(pc_labs$item), ]
+pc_labs = as.data.frame(pc$scores[,c(1,2)])
+pc_labs$item = coeffs$item
+pc_labs = pc_labs[!duplicated(pc_labs$item), ]
 
 pcplot = 
   autoplot(pc, 
@@ -392,10 +427,10 @@ pcplot =
          loadings.colour = 'grey20',
          loadings.label.size = 5,
          loadings.label.color = "grey20") +
-  # geom_text(data = pc_labs, aes(x = Comp.1, y = Comp.2,
-  #                               label = item)) +
+  geom_text(data = pc_labs, aes(x = Comp.1, y = Comp.2,
+                                 label = item)) +
   theme_bw() +
-  theme(legend.position = "right",
+  theme(legend.position = "none",
         legend.title = element_blank())
 
 pcplot
@@ -428,7 +463,7 @@ for (i in seq_along(gender_class)) {
   
   # get probabilities
   coeffs = lapply(mod, function(x){
-    resample(x, bootstrap = TRUE, seed = 1424, n1 = 150)
+    resample(x, bootstrap = TRUE, seed = 1424, n1 = 200)
   })
   
   coeffs = do.call(cbind, coeffs)
@@ -451,7 +486,7 @@ for (i in seq_along(gender_class)) {
              loadings.label.size = 5,
              loadings.label.color = "grey20") +
     theme_bw() +
-    theme(legend.position = "right", #if(i != 4) "none" else "right",
+    theme(legend.position = if(i != 4) "none" else "bottom",
           legend.title = element_blank()) +
     labs(title = paste0(names(gender_class[i]),
                         ", n = (",
@@ -467,8 +502,8 @@ p
 
 ggsave("output/biplot-trait-performance-gender.pdf",
        plot = p,
-       height = 20,
-       width = 50,
+       height = 40,
+       width = 40,
        units = "cm")
 
 # ...........................................
