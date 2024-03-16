@@ -1,7 +1,6 @@
 # .......................................
 # .......................................
-
-library("cluster")
+library("ggrepel")
 library("tidyverse")
 library("patchwork")
 library("magrittr")
@@ -9,7 +8,6 @@ library("ggfortify")
 library("gosset")
 library("PlackettLuce")
 library("ClimMobTools")
-library("summarytools")
 source("https://raw.githubusercontent.com/AgrDataSci/ClimMob-analysis/master/modules/01_functions.R")
 source("script/helper-01-function.R")
 
@@ -20,6 +18,8 @@ source("script/helper-01-function.R")
 list.files("data")
 
 dat = read.csv("data/amaranth-tricot-data.csv")
+
+covar = read.csv("data/covariates-cluster.csv")
 
 # get the list of traits
 trait_list = getTraitList(dat, pattern = c("_pos", "_neg"))
@@ -55,7 +55,6 @@ r = rank_tricot(net, pack_index, c("best", "worst"))
 
 plot(network(r))
 
-
 pdf(file = "output/trial-network.pdf",
     width = 9,
     height = 9)
@@ -81,10 +80,6 @@ traitlabels
 
 traits = c("Fourth Harvest - Overall Performance",
            "Fourth Harvest - Preference For Replanting",
-           "First Harvest - Marketability",
-           "Second Harvest - Marketability",
-           "Third Harvest - Marketability",
-           "Fourth Harvest - Marketability",
            traits[traits %in% cor_backward$trait])
 
 keep = traitlabels %in% traits
@@ -95,275 +90,33 @@ do.call("rbind", lapply(trait_list, function(x) cbind(x$trait_label, sum(x$keep)
 
 traitlabels = unlist(lapply(trait_list, function(x) c(x$trait_label)))
 
-# .......................................
-# .......................................
-# work with some covariates ####
-covar = read.csv("data/summaries/covar-available.csv")
-covar = covar[covar$sel == "x", ]
-
-covar = dat[covar$covar]
-
-names(covar) = gsub("registration_", "", names(covar))
-
-covar$country = dat$package_country
-
-pdf("output/boxplot-farmer-age.pdf",
-    width = 12,
-    height = 8)
-capture.output()
-boxplot(covar$age ~ covar$country:covar$gender,
-        xlab = "Country x Gender",
-        ylab = "Age")
-dev.off()
-
-pdf("output/boxplot-farmer-experience.pdf",
-    width = 12,
-    height = 8)
-capture.output()
-boxplot(covar$experiencecrop ~ covar$country:covar$gender,
-        xlab = "Country x Gender",
-        ylab = "Experience growing amaranth (years)")
-dev.off()
-
-pdf("output/boxplot-distance-to-market.pdf",
-    width = 12,
-    height = 8)
-capture.output()
-boxplot(covar$marketdistance ~ covar$country:covar$gender,
-        xlab = "Country x Gender",
-        ylab = "Distance to market (km)")
-dev.off()
-
-pdf("output/boxplot-income-share-from-hh-amaranth-sales.pdf",
-    width = 12,
-    height = 8)
-capture.output()
-boxplot(covar$incomecropshare~ covar$country:covar$gender,
-        xlab = "Country x Gender",
-        ylab = "HH income share from amaranth sale (%)")
-dev.off()
-
-#prop.table(table(covar$country, covar$occupation))
-#prop.table(table(covar$country, covar$typeofhh))
-
-names(covar)
-
-# identify the characters 
-chars = which(unlist(lapply(covar[1:15], is.character)))
-
-for (i in seq_along(chars)) {
-  
-  x = ctable(covar$country, covar[,chars[i]], useNA = "no", chisq = TRUE)
-  
-  y = stby(list(x = covar$country, 
-                y = covar[,chars[i]]),
-           INDICES = covar$gender, 
-           FUN = ctable,    
-           useNA = "no", 
-           chisq = TRUE)
-  
-  capture.output(c(x, y), 
-                 file = paste0("output/descriptive-statistics-covariates-", 
-                               names(chars[i]),".txt"))
-  
-}
-
-
-covar[chars] = lapply(covar[chars], function(x){
-  ifelse(is.na(x), "Unknown", x)
-})
-
-
-# input values 
-numbers = which(unlist(lapply(covar[1:15], is.numeric)))
-
-category = paste0(covar$gender, covar$country)
-unicats = unique(category)
-
-for (i in seq_along(numbers)) {
-  
-  for (j in seq_along(unicats)) {
-    
-    covar[, numbers[i]] = ifelse(is.na(covar[, numbers[i]]) & 
-                                   category == unicats[j],
-                                 median(covar[category == unicats[j], numbers[i]], na.rm = TRUE),
-                                 covar[, numbers[i]])
-    
-    covar[, numbers[i]] = as.integer(covar[, numbers[i]])
-    
-    
-  }
-}
-
-boxplot(covar[,numbers[1]])
-
-boxplot(covar[,numbers[2]])
-
-hist(covar[,numbers[3]])
-
-boxplot(covar[,numbers[4]])
-
-quant = covar[numbers]
-
-chars
-
-groups = covar[c('gender', 'whocontrolsell')]
-
-head(groups)
-
-str(groups)
-
-groups[1:ncol(groups)] = lapply(groups[1:ncol(groups)], as.factor)
-
-distance_groups = daisy(groups)
-
-clust1 = cutree(hclust(distance_groups), 2)
-
-# do it for the numeric
-quant = covar[numbers]
-quant = quant[,c("age", "incomecropshare", "experiencecrop")]
-quant = scale(quant)
-
-distance = dist(quant)
-
-clust = hclust(distance)
-
-clust2 = cutree(clust, 3)
-
-plot(clust)
-
-clust_dat = data.frame(c1 = clust1, c2 = clust2)
-
-clust_dat[1:ncol(clust_dat)] = lapply(clust_dat[1:ncol(clust_dat)], as.factor)
-
-dists = daisy(clust_dat)
-
-clust3 = hclust(dists)
-
-clust3 = cutree(clust3, 4)
-
-table(clust3)
-
-covar$Cluster = clust3
-
-covar$Cluster[covar$Cluster == 4] = 3
-
-table(covar$Cluster)
-
-covar_clust = covar[c("Cluster", 'gender', 'whocontrolsell', "age", 
-                      "incomecropshare", "experiencecrop")]
-
-# .....................................
-# .....................................
-# again, trying to split cluster 1
-
-chars
-groups = covar[covar_clust$Cluster == 1, c('gender', 'whocontrolsell', 'whocontrolprod')]
-
-head(groups)
-
-str(groups)
-
-groups[1:ncol(groups)] = lapply(groups[1:ncol(groups)], as.factor)
-
-distance_groups = daisy(groups)
-
-clust1 = hclust(distance_groups)
-
-plot(clust1)
-
-clust1 = cutree(clust1, 6)
-
-table(clust1)
-
-# do it for the numeric
-quant = covar[covar_clust$Cluster == 1,c("age", "incomecropshare", "experiencecrop")]
-quant = scale(quant)
-
-distance = dist(quant)
-
-clust = hclust(distance)
-plot(clust)
-clust2 = cutree(clust, 6)
-
-table(clust2)
-
-clust_dat = data.frame(c1 = clust1, c2 = clust2)
-
-clust_dat[1:ncol(clust_dat)] = lapply(clust_dat[1:ncol(clust_dat)], as.factor)
-
-dists = daisy(clust_dat)
-
-clust3 = hclust(dists)
-
-plot(clust3)
-
-clust3 = cutree(clust3, 5)
-
-table(clust3)
-
-clust3[clust3 > 2] = 2
-
-clust3[clust3 > 1] = 4
-
-covar_clust = covar[c("Cluster", 'country', 'age', 'gender', 'whocontrolsell', 'whocontrolprod', 
-                      "incomecropshare", "experiencecrop")]
-
-table(covar_clust$Cluster)
-
-covar_clust[covar_clust$Cluster == 1, "Cluster"] = clust3
-
-table(covar_clust$Cluster)
-
-x = cbind(dat[c("id", "package_project_name")], covar_clust)
-
-write.csv(x, "data/covariates-cluster.csv", row.names = FALSE)
-
-
-chars = which(unlist(lapply(covar_clust[1:ncol(covar_clust)], is.character)))
-
-covar_clust$Cluster = as.factor(covar_clust$Cluster)
-
-boxplot(covar$age ~ covar_clust$Cluster)
-
-boxplot(covar$experiencecrop ~ covar_clust$Cluster)
-
-boxplot(covar$incomecropshare ~ covar_clust$Cluster)
-
-summary(lm(incomecropshare ~ Cluster, data = covar_clust))
-
-summary(lm(experiencecrop ~ Cluster, data = covar_clust))
-
-summary(lm(age ~ Cluster, data = covar_clust))
-
-table(covar_clust$Cluster, covar_clust$country)
-
-table(covar_clust$Cluster, covar_clust$whocontrolsell)
-
-table(covar_clust$Cluster, covar_clust$whocontrolprod)
-
 # ..............................
 # ..............................
 # labels to clusters from chatGPT
 clust_labs = c("Empowered Women Farmers",
-               "Experienced Men Farmers",
+               "Gender Balanced Farming",
                "Rising Men Entrepreneurs",
                "Innovative Women Farmers")
 
-covar_clust$clust = covar_clust$Cluster
+covar$clust = covar$Cluster
 
-covar_clust$Cluster = factor(covar_clust$clust, labels = clust_labs)
+covar$Cluster = factor(covar$clust, labels = clust_labs)
 
-covar_clust$Cluster = factor(covar_clust$Cluster, levels = c("Empowered Women Farmers",
-                                                             "Innovative Women Farmers",
-                                                             "Experienced Men Farmers",
-                                                             "Rising Men Entrepreneurs"))
+covar$Cluster = factor(covar$Cluster, levels = c("Empowered Women Farmers",
+                                                 "Innovative Women Farmers",
+                                                 "Gender Balanced Farming",
+                                                 "Rising Men Entrepreneurs"))
+table(covar$clust)
+table(covar$Cluster)
+names(covar)
 
-table(covar_clust$Cluster)
+drop = which(names(covar) %in% c("id", "package_project_name", "clust"))
+
+covar = covar[, -drop]
 
 # ........................................
 # .......................................
-# Worth map  ####
+# PCA with log-worth  ####
 itemnames
 
 # add name of features
@@ -372,8 +125,8 @@ traitlabels
 labels = c("Plant survival 3rd harv", "Yield 3rd harv",
            "Marketability 3rd harv", "Yield 4th harv",
            "Leaf size 4th harv", "Taste 4th harv",
-           "Marketability 4th harv","Overall performance",
-           "Marketability 1st harv",  "Marketability 2nd harv",
+           "Marketability 4th harv", "Overall performance",
+           "Marketability 1st harv", "Marketability 2nd harv", 
            "Plant survival after transplanting", "Preference for replanting")
 
 R = lapply(trait_list, function(x){
@@ -385,6 +138,8 @@ R = lapply(trait_list, function(x){
 
 
 # test likelihood ratio
+# this will check whether the ranks are significantly distinct 
+# from each group
 llr = lapply(R, function(x){
   likelihood_ratio(x, split = covar$Cluster)
 })
@@ -395,10 +150,12 @@ llr$trait = labels
 
 write.csv(llr, "output/likelihood-ratio-clusters.csv")
 
+
+# PL model
 mod = lapply(R, PlackettLuce)
 
 coeffs = lapply(mod, function(x){
-  resample(x, bootstrap = TRUE, seed = 1424, n1 = 150)
+  resample(x, bootstrap = TRUE, seed = 1424, n1 = 200)
 })
 
 coeffs = do.call(cbind, coeffs)
@@ -414,26 +171,7 @@ names(coeffs)[-1] = labels
 
 pc = princomp(coeffs[-1], cor = FALSE)
 
-pc_labs = as.data.frame(pc$scores[,c(1,2)])
-pc_labs$item = coeffs$item
-pc_labs = pc_labs[!duplicated(pc_labs$item), ]
-
-pcplot = 
-  autoplot(pc, 
-         data = coeffs, 
-         color = "item",
-         loadings.label = TRUE, 
-         loadings = TRUE, 
-         loadings.colour = 'grey20',
-         loadings.label.size = 5,
-         loadings.label.color = "grey20") +
-  geom_text(data = pc_labs, aes(x = Comp.1, y = Comp.2,
-                                 label = item)) +
-  theme_bw() +
-  theme(legend.position = "none",
-        legend.title = element_blank())
-
-pcplot
+pcplot = plot_pca(pc)
 
 ggsave("output/biplot-performance-all-traits.pdf",
        plot = pcplot,
@@ -446,14 +184,14 @@ ggsave("output/biplot-performance-all-traits.pdf",
 # PCA segmented by gender and regions ####
 # first fit a PL tree to see if gender influences 
 # variety performance
-gender_class = table(covar_clust$Cluster)
+gender_class = table(covar$Cluster)
 gender_class
 plots_gender = list()
 
 for (i in seq_along(gender_class)) {
   
   R_subset = lapply(R, function(x){
-    x = x[covar_clust$Cluster == names(gender_class[i])]
+    x = x[covar$Cluster == names(gender_class[i])]
     na.omit(x)
   })
   
@@ -476,21 +214,12 @@ for (i in seq_along(gender_class)) {
 
   pc = princomp(coeffs[, -1], cor = TRUE)
   
-  pcplot = 
-    autoplot(pc, 
-             data = coeffs, 
-             color = "item",
-             loadings.label = TRUE, 
-             loadings = TRUE, 
-             loadings.colour = 'grey20',
-             loadings.label.size = 5,
-             loadings.label.color = "grey20") +
-    theme_bw() +
-    theme(legend.position = if(i != 4) "none" else "bottom",
-          legend.title = element_blank()) +
+  pcplot = plot_pca(pc, scale = 6) + 
     labs(title = paste0(names(gender_class[i]),
                         ", n = (",
                         as.integer(gender_class[i]), ")"))
+  
+  pcplot
   
   plots_gender[[i]] = pcplot
   
@@ -498,12 +227,10 @@ for (i in seq_along(gender_class)) {
 
 p = plots_gender[[1]] + plots_gender[[2]] + plots_gender[[3]] + plots_gender[[4]]
 
-p
-
 ggsave("output/biplot-trait-performance-gender.pdf",
        plot = p,
-       height = 40,
-       width = 40,
+       height = 35,
+       width = 35,
        units = "cm")
 
 # ...........................................

@@ -34,6 +34,8 @@ list.files("data")
 
 dat = read.csv("data/amaranth-tricot-data.csv")
 
+covar = read.csv("data/covariates-cluster.csv")
+
 # get the list of traits
 trait_list = getTraitList(dat, pattern = c("_pos", "_neg"))
 
@@ -185,6 +187,8 @@ cor_backward = read.csv("output/kendall-partial-correlation-backward-selection.c
 
 cor_backward$cropstage = factor(cor_backward$cropstage, 
                                 levels = c('Reproductive',
+                                           'First Harvest',
+                                           'Second Harvest',
                                            'Third Harvest',
                                            'Fourth Harvest'))
 cor_backward$cropstage
@@ -207,8 +211,7 @@ cor_plot =
   facet_grid(rows = vars(cropstage),
              scales = "free",
              space = "free") +
-  scale_fill_manual(values = c('#a1d99b','#74c476','#41ab5d',
-                               '#238b45','#006d2c','#00441b')) +
+  scale_fill_manual(values = c('#bdbdbd','#969696','#737373','#525252','#252525')) +
   theme_minimal() +
   theme(panel.grid.major = element_blank(),
         strip.background = element_rect(fill="white"),
@@ -227,20 +230,17 @@ cor_plot
 
 ggsave("output/kendall-tau-partial-correlation-all.pdf",
        plot = cor_plot,
-       height = 10,
-       width = 12)
+       height = 12,
+       width = 20,
+       units = "cm")
 
 # ..................................
 # ..................................
 # Split by gender ####
 # partial correlation with gender using traits selected in backward process
-gender = unique(na.omit(dat$registration_gender))
+gender = unique(na.omit(covar$clu))
 
 dat$gender = dat$registration_gender
-
-dat$gender[dat$gender=="Homme"] = "Man"
-
-dat$gender[dat$gender=="Femme"] = "Woman"
 
 table(dat$gender)
 

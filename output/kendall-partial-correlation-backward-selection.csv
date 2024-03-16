@@ -1,4 +1,8 @@
 "trait","cropstage","croptrait","cor","pval"
+"Third Harvest - Marketability","Third Harvest","Marketability",0.161648864730693,0.180833189858375
+"Fourth Harvest - Marketability","Fourth Harvest","Marketability",0.131490825132396,0.277442166225063
+"First Harvest - Marketability","First Harvest","Marketability",0.0864660545542798,0.476205482140872
+"Second Harvest - Marketability","Second Harvest","Marketability",0.116336623276289,0.337055994547003
 "Third Harvest - Plant Survival","Third Harvest","Plant Survival",0.201058641601116,0.0903177713142116
 "Third Harvest - Yield","Third Harvest","Yield",0.220541795891991,0.062628157730974
 "Fourth Harvest - Yield","Fourth Harvest","Yield",0.317567828553361,0.00655658626502032
