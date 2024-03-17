@@ -300,8 +300,8 @@ tree = pltree(G ~ Cluster + Harvest,
 
 tree
 
-ptree = plot(tree, log = TRUE, ci.level = 0.05)
-
+ptree = plot(tree, log = TRUE, ci.level = 0.05, ref = "Local")
+ptree
 ggsave(filename = "output/pltree-marketability-covars.pdf",
        plot = ptree,
        units = "cm",

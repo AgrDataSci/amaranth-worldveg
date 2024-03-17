@@ -71,13 +71,13 @@ fix_trait_labels = function(x){
 # plot pca
 plot_pca = function(object, scale = 3){
 
-  sums = summary(pc)
+  sums = summary(object)
   
   vars = sums$sdev^2
   
   vars = round(vars/sum(vars) * 100, 1)
   
-  pcd = as.data.frame(pc$scores[,1:2])
+  pcd = as.data.frame(object$scores[,1:2])
   names(pcd) = c("dim1", "dim2")
   pcd$item = coeffs$item
   
@@ -91,14 +91,13 @@ plot_pca = function(object, scale = 3){
  
   pcd_text = do.call("rbind", pcd_text)
   
-  loadings = as.data.frame(pc$loadings[1:length(traitlabels), ])
+  loadings = as.data.frame(object$loadings[1:length(traitlabels), ])
   names(loadings) = paste0("dim", 1:ncol(loadings))
   loadings$traits = rownames(loadings)
   
   pcplot = 
     ggplot(pcd) +
     geom_point(aes(x = dim1, y = dim2, color = item)) +
-    #coord_fixed() +
     geom_segment(data = loadings, aes(x = 0, 
                                       y = 0, 
                                       xend = dim1 * scale,
