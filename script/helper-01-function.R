@@ -86,7 +86,7 @@ plot_pca = function(object, scale = 3){
   pcd_text = lapply(pcd_text, function(x){
     data.frame(item = x$item[1],
                dim1_m = mean(x$dim1),
-               dim2_m = max(x$dim2))
+               dim2_m = mean(x$dim2))
   })
  
   pcd_text = do.call("rbind", pcd_text)
