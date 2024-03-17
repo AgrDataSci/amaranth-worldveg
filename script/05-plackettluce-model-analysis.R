@@ -282,147 +282,208 @@ head(pld)
 
 pld$Harvest = gsub(" Harvest - Marketability", "", pld$Harvest)
 
-#pld$Harvest = factor(pld$Harvest, levels = c("First", "Second", "Third", "Fourth"))
+pld$Harvest = factor(pld$Harvest, levels = c("First", "Second", "Third", "Fourth"))
 
 chars = which(unlist(lapply(pld[1:ncol(pld)], is.character)))
 
 pld[chars] = lapply(pld[chars], as.factor)
 
+head(pld)
 
-# mod = forward_selection(pld, minsize = 50, gamma = TRUE)
+str(pld)
 
-
-tree = pltree(G ~ age + country + gender + Harvest, 
-              data = pld, 
-              gamma = TRUE, 
+tree = pltree(G ~ Cluster + Harvest,
+              data = pld,
+              gamma = TRUE,
               minsize = 100)
 
 
 tree
 
-deviance(tree)
-
-nodes_tree = predict(tree, type = "node")
-node_id_tree = sort(unique(nodes_tree))
-
-length(nodes_tree) == length(pld$G)
-
-tree_mod = list()
-nobs_tree = integer()
-
-for (i in seq_along(node_id_tree)) {
-  
-  Gi = pld$G[nodes_tree == node_id_tree[i]]
-  
-  tree_mod[[i]] = PlackettLuce(Gi)
-  
-  nobs_tree = c(nobs_tree, length(Gi))
-  
-  rm(Gi)
-}
-
-tree_branch = gosset:::build_tree_branches(tree)
-
-tree_nodes = gosset:::build_tree_nodes(tree_mod, 
-                                       log = FALSE,
-                                       node.ids = node_id_tree,
-                                       n.obs = nobs_tree,
-                                       ci.level = 0.1)
-
-ptree = tree_branch / tree_nodes + plot_layout(heights =  c(1, 1))
-
-ptree
+ptree = plot(tree, log = TRUE, ci.level = 0.05)
 
 ggsave(filename = "output/pltree-marketability-covars.pdf",
        plot = ptree,
        units = "cm",
-       height = 20,
-       width = 20)
+       height = 30,
+       width = 40)
 
 
-ggsave("output/pltree-marketability-worth.pdf",
-       plot = ptree,
-       width = 20,
-       height = 20,
-       units = "cm")
+# .........................................
+# .........................................
+# get pairwise comps matrix using worth ####
+lvls = rev(itemnames)
 
+plots = list()
 
-# ...........................................
-# ...........................................
-# Overall preference ####
-overall_trait = getTraitList(dat, c("_pos", "_neg"))
-
-overall = lapply(overall_trait, function(x){
-  x$trait_label
-})
-
-overall = unlist(overall)
-
-sel = grepl("overallperformance|cropstageperformance", overall)
-
-overall = overall[sel]
-
-overall_trait = overall_trait[sel]
-
-overall = fix_trait_labels(overall)
-
-do.call("rbind", lapply(overall_trait, function(x) cbind(x$trait_label, sum(x$keep))))
-
-
-R_overall = lapply(overall_trait, function(x){
-  rank_tricot(data = dat,
-              items = pack_index,
-              input = x$string,
-              validate.rankings = TRUE)
-})
-
-pld = data.frame()
-
-O = matrix()
-
-for(i in seq_along(R_overall)) {
+for(k in seq_along(gender_class)) {
   
-  r = R_overall[[i]]
+  g = pld[pld$Cluster == names(gender_class[k]), "G"]
   
-  keep = !is.na(r)
+  mod = PlackettLuce(g)
   
-  group_i = dat$gender[keep]
+  pair_worth = matrix(0, 
+                      nrow = length(lvls), 
+                      ncol = length(lvls),
+                      dimnames = list(rev(lvls), rev(lvls)))
   
-  r = r[keep, ]
+  worths = coef(mod, log = FALSE)
   
-  d = data.frame(Gender = group_i, Harvest = overall[i])
+  for(i in seq_len(ncol(pair_worth))) {
+    
+    for(j in seq_len(nrow(pair_worth))) {
+      
+      col_i = dimnames(pair_worth)[[1]][i]
+      row_j = dimnames(pair_worth)[[2]][j]
+      
+      if(col_i == row_j) next
+      
+      print(c(col_i, row_j))
+      
+      w = worths[col_i] / (worths[col_i] + worths[row_j])
+      
+      w = round(w, 2)
+      
+      pair_worth[row_j, col_i] = w
+      
+    }
+    
+  }
   
-  pld = rbind(pld, d)
+  pair_worth = pair_worth - 0.5
+  pair_worth[pair_worth == -0.5] = NA
   
-  O = rbind(O, r)  
+  #pair_worth[upper.tri(pair_worth)] = NA
+  
+  pair_dat = data.frame(player1 = rep(rev(lvls), each = length(lvls)), 
+                        player2 = rep(rev(lvls), times = length(lvls)),
+                        worth = as.vector(pair_worth))
+  
+  pair_dat$player1 = factor(pair_dat$player1, levels = lvls)
+  
+  pair_dat$player2 = factor(pair_dat$player2, levels = rev(lvls))
+  
+  pair_dat$worth = round(pair_dat$worth, 2)
+  
+  p = ggplot(pair_dat, 
+             aes(x = player2, 
+                 y = player1,
+                 fill = worth,
+                 label = worth)) +
+    geom_tile() + 
+    geom_text() +
+    scale_fill_gradient2(low = "#d53e4f", 
+                         high = "#3288bd", 
+                         mid = "white",
+                         na.value = "white",
+                         midpoint = 0) +
+    scale_x_discrete(position = "top") +
+    theme_bw() +
+    theme(axis.text = element_text(color = "grey10"),
+          strip.text.x = element_text(color = "grey10"),
+          axis.text.x = element_text(angle = 90, hjust = 0),
+          panel.grid = element_blank(),
+          legend.position = "none") +
+    labs(x = "", 
+         y = "",
+         title = paste0("(", LETTERS[k], ") ", 
+                        names(gender_class)[k]),
+         fill = "")
+  p
+  plots[[k]] = p
+  
 }
 
-O = O[-1, ]
+p = plots[[1]] + plots[[2]] + 
+  plots[[3]] + plots[[4]]
+p
 
-G = group(O, index = 1:length(O))
-
-pld$G = G
-
-head(pld)
-
-pld$Gender = as.factor(pld$Gender)
-
-pld$Harvest = gsub(" Harvest - Overall Performance", "", pld$Harvest)
-
-pld$Harvest = gsub(" Harvest - Crop Stage Performance", "", pld$Harvest)
-
-pld$Harvest = factor(pld$Harvest, levels = c("First", "Second", "Third", "Fourth"))
-
-tree = pltree(G ~ ., data = pld, minsize = 100, gamma = TRUE)
-
-tree
-
-ptree = plot(tree, ci.level = 0.1)
-
-ggsave("output/pltree-marketability.pdf",
-       plot = ptree,
-       width = 20,
-       height = 20,
-       units = "cm")
+ggsave("output/pairwise-probabilities-marketability.pdf",
+       plot = p,
+       width = 35,
+       height = 35,
+       units = "cm",
+       dpi = 600)
+ 
 
 
+# 
+# 
+# # ...........................................
+# # ...........................................
+# # Overall preference ####
+# overall_trait = getTraitList(dat, c("_pos", "_neg"))
+# 
+# overall = lapply(overall_trait, function(x){
+#   x$trait_label
+# })
+# 
+# overall = unlist(overall)
+# 
+# sel = grepl("overallperformance|cropstageperformance", overall)
+# 
+# overall = overall[sel]
+# 
+# overall_trait = overall_trait[sel]
+# 
+# overall = fix_trait_labels(overall)
+# 
+# do.call("rbind", lapply(overall_trait, function(x) cbind(x$trait_label, sum(x$keep))))
+# 
+# R_overall = lapply(overall_trait, function(x){
+#   rank_tricot(data = dat,
+#               items = pack_index,
+#               input = x$string,
+#               validate.rankings = TRUE)
+# })
+# 
+# pld = data.frame()
+# 
+# O = matrix()
+# 
+# for(i in seq_along(R_overall)) {
+# 
+#   r = R_overall[[i]]
+# 
+#   keep = !is.na(r)
+# 
+#   group_i = covar$Cluster[keep]
+# 
+#   r = r[keep, ]
+# 
+#   d = data.frame(Cluster = group_i, Harvest = overall[i])
+# 
+#   pld = rbind(pld, d)
+# 
+#   O = rbind(O, r)
+# }
+# 
+# O = O[-1, ]
+# 
+# nrow(pld)
+# nrow(O)
+# 
+# G = group(O, index = 1:length(O))
+# 
+# pld$G = G
+# 
+# head(pld)
+# 
+# pld$Harvest = gsub(" Harvest - Overall Performance", "", pld$Harvest)
+# 
+# pld$Harvest = gsub(" Harvest - Crop Stage Performance", "", pld$Harvest)
+# 
+# pld$Harvest = factor(pld$Harvest, levels = c("First", "Second", "Third", "Fourth"))
+# 
+# 
+# table(pld$Cluster)
+# 
+# table(pld$Cluster, pld$Harvest)
+# 
+# tree = pltree(G ~ Cluster, data = pld, alpha = 0.1, minsize = 50, gamma = TRUE)
+# 
+# tree
+# 
+# mod = PlackettLuce(pseudo_rank(O))
+# 
+# plot_worth(mod)
