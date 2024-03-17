@@ -94,7 +94,7 @@ traitlabels = unlist(lapply(trait_list, function(x) c(x$trait_label)))
 # ..............................
 # labels to clusters from chatGPT
 clust_labs = c("Empowered Women Farmers",
-               "Gender Balanced Farming",
+               "Experienced Men Farmers",
                "Rising Men Entrepreneurs",
                "Innovative Women Farmers")
 
@@ -104,7 +104,7 @@ covar$Cluster = factor(covar$clust, labels = clust_labs)
 
 covar$Cluster = factor(covar$Cluster, levels = c("Empowered Women Farmers",
                                                  "Innovative Women Farmers",
-                                                 "Gender Balanced Farming",
+                                                 "Experienced Men Farmers",
                                                  "Rising Men Entrepreneurs"))
 table(covar$clust)
 table(covar$Cluster)
@@ -113,6 +113,10 @@ names(covar)
 drop = which(names(covar) %in% c("id", "package_project_name", "clust"))
 
 covar = covar[, -drop]
+
+table(covar$Cluster, covar$whocontrolprod)
+
+table(covar$Cluster, covar$whocontrolsell)
 
 # ........................................
 # .......................................
@@ -173,6 +177,8 @@ pc = princomp(coeffs[-1], cor = FALSE)
 
 pcplot = plot_pca(pc)
 
+pcplot
+
 ggsave("output/biplot-performance-all-traits.pdf",
        plot = pcplot,
        height = 25,
@@ -201,7 +207,7 @@ for (i in seq_along(gender_class)) {
   
   # get probabilities
   coeffs = lapply(mod, function(x){
-    resample(x, bootstrap = TRUE, seed = 1424, n1 = 200)
+    resample(x, bootstrap = TRUE, seed = 1424, n1 = 200) 
   })
   
   coeffs = do.call(cbind, coeffs)
@@ -215,9 +221,10 @@ for (i in seq_along(gender_class)) {
   pc = princomp(coeffs[, -1], cor = TRUE)
   
   pcplot = plot_pca(pc, scale = 6) + 
-    labs(title = paste0(names(gender_class[i]),
-                        ", n = (",
-                        as.integer(gender_class[i]), ")"))
+    labs(title = paste0("(", LETTERS[i], ") ", 
+                        names(gender_class[i]),
+                        ", n = ",
+                        as.integer(gender_class[i])))
   
   pcplot
   
@@ -227,7 +234,7 @@ for (i in seq_along(gender_class)) {
 
 p = plots_gender[[1]] + plots_gender[[2]] + 
   plots_gender[[3]] + plots_gender[[4]]
-p
+
 ggsave("output/biplot-trait-performance-gender.pdf",
        plot = p,
        height = 35,

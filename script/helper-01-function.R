@@ -105,7 +105,7 @@ plot_pca = function(object, scale = 3){
                                       yend = dim2 * scale),
                  arrow = arrow(length = unit(0.3, "cm"), 
                                type = "open", angle = 25),
-                 size = 0.7, color = "grey20") +
+                 linewidth = 0.7, color = "grey20") +
     geom_label_repel(data = pcd_text, aes(x = dim1_m,
                                           y = dim2_m,
                                           label = item,
