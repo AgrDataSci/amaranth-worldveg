@@ -225,8 +225,9 @@ for (i in seq_along(gender_class)) {
   
 }
 
-p = plots_gender[[1]] + plots_gender[[2]] + plots_gender[[3]] + plots_gender[[4]]
-
+p = plots_gender[[1]] + plots_gender[[2]] + 
+  plots_gender[[3]] + plots_gender[[4]]
+p
 ggsave("output/biplot-trait-performance-gender.pdf",
        plot = p,
        height = 35,

@@ -1,10 +1,12 @@
-# Template analysis workflow
+# Replication data for: Using a citizen science on-farm testing approach to inform demand-driven breeding of neglected and underutilized crop species
 
-This is a template for R projects for data analysis. For repositories with other goals please look at other templates (if any). Create your new repository using this template, then clone the repo and change the name of the existing R-project file .Rproj or create a new R-project (https://bookdown.org/daniel_dauber_io/r4np_book/starting-your-r-projects.html) 
 
-Suggestions/comments on this template or for new templates are welcome!
+Objectives: Neglected and under-utilized species (NUS) offer benefits to producers and consumers related to nutrition and climate resilience, but the availability of improved varieties is limited. This study sought to identify farmer preferences and market segments for amaranth, a neglected and under-utilized crop species, with particular attention to gender and social differentiation. Through a participatory citizen science approach, the study seeks to support more demand-driven breeding and seed production for improved varieties of NUS like amaranth.
 
-## Project-oriented workflow
+Methods: We conducted participatory on-farm amaranth trials in Benin, Mali, and Tanzania using the tricot approach. We then analyzed farmer trait and varietal preferences across key factors such as gender, age, country, and harvest period. Finally, we compared these findings to amaranth seed producers’ assessment of important varietal traits. 
 
-Why we use project-oriented workflow? Here is the answer (https://www.tidyverse.org/blog/2017/12/workflow-vs-script/). From these recommendations the only thing that I think we can skip is using the package "here". 
+Key Results: We identified a subset of traits (plant survival, yield, leaf size, and taste) that drove farmers’ overall preferences for amaranth varieties, although taste is not currently identified by seed enterprises as a priority trait. We also found evidence that women’s rankings of varieties’ marketability shifted across harvest periods.
 
+Main conclusion / key discussion points: Ultimately, we identified the need for breeding programs to explore organoleptic and market-related properties of amaranth, particularly over the course of the production cycle. Participatory variety assessments like this can enable demand-driven breeding both of NUS and of staple crops for which adoption of improved varieties remains a challenge.
+
+Keywords: African traditional vegetables, data-driven agriculture, participatory plant breeding, gender, trait preferences, seed systems, socioeconomic heterogeneity, tricot approach 
