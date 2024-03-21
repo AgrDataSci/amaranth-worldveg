@@ -8,7 +8,8 @@ library("ggfortify")
 library("gosset")
 library("PlackettLuce")
 library("ClimMobTools")
-source("https://raw.githubusercontent.com/AgrDataSci/ClimMob-analysis/master/modules/01_functions.R")
+#source("https://raw.githubusercontent.com/AgrDataSci/ClimMob-analysis/master/modules/01_functions.R")
+source("/Users/kauedesousa/Library/Mobile Documents/com~apple~CloudDocs/Work/Rcode/ClimMob-analysis/modules/01_functions.R")
 source("script/helper-01-function.R")
 
 # .......................................
@@ -93,19 +94,19 @@ traitlabels = unlist(lapply(trait_list, function(x) c(x$trait_label)))
 # ..............................
 # ..............................
 # labels to clusters from chatGPT
-clust_labs = c("Empowered Women Farmers",
-               "Experienced Men Farmers",
-               "Rising Men Entrepreneurs",
-               "Innovative Women Farmers")
+clust_labs = c("Older Women Generalists",
+               "Older Men Generalists",
+               "Young Men Specialists",
+               "Young Women Specialists")
 
 covar$clust = covar$Cluster
 
 covar$Cluster = factor(covar$clust, labels = clust_labs)
 
-covar$Cluster = factor(covar$Cluster, levels = c("Empowered Women Farmers",
-                                                 "Innovative Women Farmers",
-                                                 "Experienced Men Farmers",
-                                                 "Rising Men Entrepreneurs"))
+covar$Cluster = factor(covar$Cluster, levels = c("Older Women Generalists",
+                                                 "Young Women Specialists",
+                                                 "Older Men Generalists",
+                                                 "Young Men Specialists"))
 table(covar$clust)
 table(covar$Cluster)
 names(covar)
@@ -153,7 +154,6 @@ llr = do.call("rbind", llr)
 llr$trait = labels
 
 write.csv(llr, "output/likelihood-ratio-clusters.csv")
-
 
 # PL model
 mod = lapply(R, PlackettLuce)
@@ -234,6 +234,8 @@ for (i in seq_along(gender_class)) {
 
 p = plots_gender[[1]] + plots_gender[[2]] + 
   plots_gender[[3]] + plots_gender[[4]]
+
+p
 
 ggsave("output/biplot-trait-performance-gender.pdf",
        plot = p,
@@ -405,7 +407,10 @@ ggsave("output/pairwise-probabilities-marketability.pdf",
        units = "cm",
        dpi = 600)
  
+?regret()
 
+
+r = regret(tree)
 
 # 
 # 
