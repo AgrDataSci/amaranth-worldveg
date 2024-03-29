@@ -14,7 +14,7 @@ source("https://raw.githubusercontent.com/AgrDataSci/ClimMob-analysis/master/mod
 
 
 # read file with API key,
-key = "1879b555-d5a3-4b6a-905c-bdc087c8021d"
+key = "."
 server = "1000farms"
 
 replace_codes = read.csv("data/replacement-pattern-names.csv")

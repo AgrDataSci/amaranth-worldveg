@@ -4,6 +4,7 @@ library("cluster")
 library("gosset")
 library("PlackettLuce")
 library("summarytools")
+library("tidyverse")
 source("https://raw.githubusercontent.com/AgrDataSci/ClimMob-analysis/master/modules/01_functions.R")
 source("script/helper-01-function.R")
 
@@ -15,6 +16,8 @@ list.files("data")
 
 dat = read.csv("data/amaranth-tricot-data.csv")
 
+plot(dat$longitude, dat$latitude)
+
 # .......................................
 # .......................................
 # work with some covariates ####
@@ -22,6 +25,8 @@ covar = read.csv("data/summaries/covar-available.csv")
 covar = covar[covar$sel == "x", ]
 
 covar = dat[covar$covar]
+
+covar$sellshare = dat$registration_sellshare
 
 names(covar) = gsub("registration_", "", names(covar))
 
@@ -120,6 +125,13 @@ boxplot(covar[,numbers[1]])
 boxplot(covar[,numbers[2]])
 
 hist(covar[,numbers[3]])
+
+names(covar)
+
+covar %>% 
+  group_by(country) %>% 
+  summarise(mean = mean(sellshare))
+
 
 boxplot(covar[,numbers[4]])
 
