@@ -8,8 +8,8 @@ library("ggfortify")
 library("gosset")
 library("PlackettLuce")
 library("ClimMobTools")
-#source("https://raw.githubusercontent.com/AgrDataSci/ClimMob-analysis/master/modules/01_functions.R")
-source("/Users/kauedesousa/Library/Mobile Documents/com~apple~CloudDocs/Work/Rcode/ClimMob-analysis/modules/01_functions.R")
+source("https://raw.githubusercontent.com/AgrDataSci/ClimMob-analysis/master/modules/01_functions.R")
+#source("/Users/kauedesousa/Library/Mobile Documents/com~apple~CloudDocs/Work/Rcode/ClimMob-analysis/modules/01_functions.R")
 source("script/helper-01-function.R")
 
 # .......................................
@@ -45,8 +45,13 @@ itemnames = sort(unique(unlist(dat[, pack_index])))
 
 itemnames
 
-t(table(rep(dat$package_country, times = 3), unlist(dat[pack_index])))
+items_available = table(unlist(dat[pack_index]), rep(dat$package_country, times = 3))
 
+table(unlist(dat[pack_index]), rep(covar$gender, times = 3))
+
+write.csv(items_available, "output/table-01-variety-summary.csv")
+
+# create a representation of the trial network
 net = dat[, pack_index]
 
 net$best = "A"
@@ -152,14 +157,24 @@ llr = lapply(R, function(x){
 llr = do.call("rbind", llr)
 
 llr$trait = labels
-
+llr
 write.csv(llr, "output/likelihood-ratio-clusters.csv")
 
 # PL model
 mod = lapply(R, PlackettLuce)
 
+# co = lapply(mod, coefficients)
+# 
+# co = do.call(cbind, co)
+# co = as.data.frame(co)
+# names(co) = labels
+# 
+# co$item = rownames(co)
+# 
+# coeffs = co
+
 coeffs = lapply(mod, function(x){
-  resample(x, bootstrap = TRUE, seed = 1424, n1 = 200)
+  resample(x, bootstrap = TRUE, seed = 1424, n1 = 3)
 })
 
 coeffs = do.call(cbind, coeffs)
@@ -318,11 +333,15 @@ lvls = rev(itemnames)
 
 plots = list()
 
+models = list()
+
 for(k in seq_along(gender_class)) {
   
   g = pld[pld$Cluster == names(gender_class[k]), "G"]
   
   mod = PlackettLuce(g)
+  
+  models[[k]] = mod
   
   pair_worth = matrix(0, 
                       nrow = length(lvls), 
@@ -407,88 +426,9 @@ ggsave("output/pairwise-probabilities-marketability.pdf",
        units = "cm",
        dpi = 600)
  
-?regret()
+# Perform regret analysis 
+r = regret(models, n1 = 1000, normalize = T)
+
+write.csv(r, "output/regret-table-four-groups.csv")
 
 
-r = regret(tree)
-
-# 
-# 
-# # ...........................................
-# # ...........................................
-# # Overall preference ####
-# overall_trait = getTraitList(dat, c("_pos", "_neg"))
-# 
-# overall = lapply(overall_trait, function(x){
-#   x$trait_label
-# })
-# 
-# overall = unlist(overall)
-# 
-# sel = grepl("overallperformance|cropstageperformance", overall)
-# 
-# overall = overall[sel]
-# 
-# overall_trait = overall_trait[sel]
-# 
-# overall = fix_trait_labels(overall)
-# 
-# do.call("rbind", lapply(overall_trait, function(x) cbind(x$trait_label, sum(x$keep))))
-# 
-# R_overall = lapply(overall_trait, function(x){
-#   rank_tricot(data = dat,
-#               items = pack_index,
-#               input = x$string,
-#               validate.rankings = TRUE)
-# })
-# 
-# pld = data.frame()
-# 
-# O = matrix()
-# 
-# for(i in seq_along(R_overall)) {
-# 
-#   r = R_overall[[i]]
-# 
-#   keep = !is.na(r)
-# 
-#   group_i = covar$Cluster[keep]
-# 
-#   r = r[keep, ]
-# 
-#   d = data.frame(Cluster = group_i, Harvest = overall[i])
-# 
-#   pld = rbind(pld, d)
-# 
-#   O = rbind(O, r)
-# }
-# 
-# O = O[-1, ]
-# 
-# nrow(pld)
-# nrow(O)
-# 
-# G = group(O, index = 1:length(O))
-# 
-# pld$G = G
-# 
-# head(pld)
-# 
-# pld$Harvest = gsub(" Harvest - Overall Performance", "", pld$Harvest)
-# 
-# pld$Harvest = gsub(" Harvest - Crop Stage Performance", "", pld$Harvest)
-# 
-# pld$Harvest = factor(pld$Harvest, levels = c("First", "Second", "Third", "Fourth"))
-# 
-# 
-# table(pld$Cluster)
-# 
-# table(pld$Cluster, pld$Harvest)
-# 
-# tree = pltree(G ~ Cluster, data = pld, alpha = 0.1, minsize = 50, gamma = TRUE)
-# 
-# tree
-# 
-# mod = PlackettLuce(pseudo_rank(O))
-# 
-# plot_worth(mod)

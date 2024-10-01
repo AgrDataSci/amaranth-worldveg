@@ -67,7 +67,6 @@ boxplot(covar$incomecropshare~ covar$country:covar$gender,
         xlab = "Country x Gender",
         ylab = "HH income share from amaranth sale (%)")
 dev.off()
-
 #prop.table(table(covar$country, covar$occupation))
 #prop.table(table(covar$country, covar$typeofhh))
 
@@ -167,6 +166,8 @@ plot(clust)
 clust_dat = data.frame(c1 = clust1, c2 = clust2)
 
 clust_dat[1:ncol(clust_dat)] = lapply(clust_dat[1:ncol(clust_dat)], as.factor)
+
+head(clust_dat)
 
 dists = daisy(clust_dat)
 
