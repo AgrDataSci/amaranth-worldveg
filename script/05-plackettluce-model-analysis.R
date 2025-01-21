@@ -174,7 +174,7 @@ mod = lapply(R, PlackettLuce)
 # coeffs = co
 
 coeffs = lapply(mod, function(x){
-  resample(x, bootstrap = TRUE, seed = 1424, n1 = 3)
+  resample(x, bootstrap = TRUE, seed = 1424, n1 = 5)
 })
 
 coeffs = do.call(cbind, coeffs)
@@ -222,7 +222,7 @@ for (i in seq_along(gender_class)) {
   
   # get probabilities
   coeffs = lapply(mod, function(x){
-    resample(x, bootstrap = TRUE, seed = 1424, n1 = 200) 
+    resample(x, bootstrap = TRUE, seed = 1424, n1 = 3) 
   })
   
   coeffs = do.call(cbind, coeffs)
