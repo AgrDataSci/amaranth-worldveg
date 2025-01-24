@@ -49,24 +49,6 @@ items_available = table(unlist(dat[pack_index]), rep(dat$package_country, times 
 
 table(unlist(dat[pack_index]), rep(covar$gender, times = 3))
 
-write.csv(items_available, "output/table-01-variety-summary.csv")
-
-# create a representation of the trial network
-net = dat[, pack_index]
-
-net$best = "A"
-net$worst = "C"
-
-r = rank_tricot(net, pack_index, c("best", "worst"))
-
-plot(network(r))
-
-pdf(file = "output/trial-network.pdf",
-    width = 9,
-    height = 9)
-plot(network(r))
-dev.off()
-
 # .......................................
 # .......................................
 # select traits ####
@@ -147,12 +129,22 @@ R = lapply(trait_list, function(x){
 })
 
 
+
 # test likelihood ratio
+split = dat$package_country
+
+table(split)
+
 # this will check whether the ranks are significantly distinct 
 # from each group
 llr = lapply(R, function(x){
-  likelihood_ratio(x, split = covar$Cluster)
+  likelihood_ratio(x, split = split)
 })
+
+
+for(i in seq_along(R)){
+  likelihood_ratio(R[[i]], split = split)
+}
 
 llr = do.call("rbind", llr)
 
@@ -173,11 +165,8 @@ mod = lapply(R, PlackettLuce)
 # 
 # coeffs = co
 
-n = sum(rowSums(do.call('cbind', lapply(trait_list, function(x) x$keep))) > 0)
-
-
 coeffs = lapply(mod, function(x){
-  resample(x, bootstrap = TRUE, seed = 1424, n1 = n)
+  resample(x, bootstrap = TRUE, seed = 1424, n1 = 5)
 })
 
 coeffs = do.call(cbind, coeffs)
@@ -199,8 +188,8 @@ pcplot
 
 ggsave("output/biplot-performance-all-traits.pdf",
        plot = pcplot,
-       height = 20,
-       width = 20,
+       height = 25,
+       width = 25,
        units = "cm")
 
 # ...........................................
@@ -214,8 +203,6 @@ plots_gender = list()
 
 for (i in seq_along(gender_class)) {
   
-  n_i = as.integer(gender_class[i])
-  
   R_subset = lapply(R, function(x){
     x = x[covar$Cluster == names(gender_class[i])]
     na.omit(x)
@@ -227,7 +214,7 @@ for (i in seq_along(gender_class)) {
   
   # get probabilities
   coeffs = lapply(mod, function(x){
-    resample(x, bootstrap = TRUE, seed = 1424, n1 = n_i) 
+    resample(x, bootstrap = TRUE, seed = 1424, n1 = 5) 
   })
   
   coeffs = do.call(cbind, coeffs)
@@ -244,7 +231,7 @@ for (i in seq_along(gender_class)) {
     labs(title = paste0("(", LETTERS[i], ") ", 
                         names(gender_class[i]),
                         ", n = ",
-                        n_i))
+                        as.integer(gender_class[i])))
   
   pcplot
   
