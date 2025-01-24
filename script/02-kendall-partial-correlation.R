@@ -193,35 +193,35 @@ cor_backward$cropstage = factor(cor_backward$cropstage,
                                            'Fourth Harvest'))
 cor_backward$cropstage
 
-cor_backward = cor_backward[order(cor_backward$cor), ]
+cor_backward = cor_backward[order(cor_backward$cropstage), ]
 
 cor_backward$trait = factor(cor_backward$trait, 
-                            levels = unique(cor_backward$trait))
+                            levels = cor_backward$trait)
 
-head(cor_backward)
+cor_backward
 
 # make a bar plot plot
 cor_plot =
   ggplot(data = cor_backward,
          aes(y = cor,
-             x = croptrait,
+             x = trait,
              fill  = cropstage)) +
   geom_chicklet(show.legend = TRUE) +
   coord_flip() +
   facet_grid(rows = vars(cropstage),
              scales = "free",
              space = "free") +
-  scale_fill_manual(values = c('#bdbdbd','#969696','#737373','#525252','#252525')) +
+  scale_fill_manual(values = c('#d7191c','#fdae61','#ffffbf','#abd9e9','#2c7bb6')) +
   theme_minimal() +
   theme(panel.grid.major = element_blank(),
         strip.background = element_rect(fill="white"),
         text = element_text(color = "grey10"),
         strip.text.y = element_blank(),
-        legend.position = "right",
-        strip.text = element_text(size = 16, color = "grey10"),
-        legend.text = element_text(size = 16, color = "grey10"),
-        axis.text = element_text(size = 16, color = "grey10"),
-        axis.title = element_text(size = 16, color = "grey10"),
+        legend.position = "none",
+        strip.text = element_text(size = 12, color = "grey10"),
+        legend.text = element_text(size = 12, color = "grey10"),
+        axis.text = element_text(size = 12, color = "grey10"),
+        axis.title = element_text(size = 12, color = "grey10"),
         legend.title = element_blank()) +
   labs(x = "",
        y = "Kendal rank correlation with Overall Performance")
