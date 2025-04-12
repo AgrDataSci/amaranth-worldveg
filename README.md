@@ -1,5 +1,6 @@
 <!-- badges: start -->
 [![License](https://img.shields.io/badge/License-CC%20BY%204.0-blue.svg)](https://creativecommons.org/licenses/by/4.0/deed.en) 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15204183.svg)](https://doi.org/10.5281/zenodo.15204183)
 <!-- badges: end -->
 
 ## Replication data for: Citizen science informs demand-driven breeding of opportunity crops
