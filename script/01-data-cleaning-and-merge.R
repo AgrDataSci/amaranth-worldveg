@@ -221,5 +221,5 @@ names(dat)
 
 
 # save dat as csv file. 
-#write_excel_csv(dat, file = "data/amaranth-tricot-data.csv")
+write_excel_csv(dat, file = "data/amaranth-tricot-data.csv")
 

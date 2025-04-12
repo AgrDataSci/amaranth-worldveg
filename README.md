@@ -1,6 +1,5 @@
-# Replication data for: Citizen science informs demand-driven breeding of opportunity crops 
-
-> Rachel C. Voss, Kauê de Sousa, Sognigbé N'Danikou, Abdul Shango, Lys Amavi Aglinglo, Marie-Angélique Laporte, Eric C. Legba, Aristide Carlos Houdegbe, Danfing dit Youssouf Diarra, Aminata Dolo, Amadou Sidibe, Colette Ouidyam Ouedraogo, Harouna Coulibaly, Enoch G. Achigan-Dako, Aishi Kileo, Dickson Malulu, Zamira Matumbo, Fekadu Dinssa, Joost van Heerwaarden, Jacob van Etten, Amritbir Riar, Maarten van Zonneveld
+# Replication data for: Citizen science informs demand-driven breeding of opportunity crops
+> Voss, Rachel; de Sousa, Kauê; N'Danikou, Sognigbe; Shango, Abdul; Aglinglo, Lys; Laporte, Marie-Angélique; Legba, Eric; Houdegbe, Carlos; Diarra, Danfing; Dolo, Aminata; Sidibe, Amadou; Ouedraogo, Colette; Coulibaly, Harouna; Achigan Dako, Enoch; Kileo, Aishi ; Malulu, Dickson; Matumbo, Zamira ; Dinssa, Fekadu; van Heerwaarden, Joost ; Van Etten, Jacob ; Riar, Amritbir; van Zonneveld, Maarten
 
 ## Summary
 RATIONALE: Opportunity crops, also known as neglected and underutilized species (NUS), offer benefits to diversify food systems with nutritious and climate-resilient foods. A major limitation to incorporate these crops in farming systems is the lack of improved varieties, which impedes farmers from accessing quality planting materials of these crops. The study explored how citizen science methods can support demand-driven breeding and seed production of NUS using leafy amaranth – a nutritious and hardy vegetable - as a case study. The study identified farmer preferences and market segments, with particular attention to gender and social differentiation. 
