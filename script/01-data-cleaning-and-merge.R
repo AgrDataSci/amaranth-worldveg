@@ -9,6 +9,7 @@ library("gosset")
 library("janitor")
 library("dplyr")
 library("readr")
+library("sf")
 # additional functions from ClimMob-analysis 
 source("https://raw.githubusercontent.com/AgrDataSci/ClimMob-analysis/master/modules/01_functions.R")
 
@@ -28,9 +29,16 @@ userowner = c("sognigbendanikou", "AbdulShango")
 
 projects = projects[projects$user_owner %in% userowner, ]
 
+p = c("amaML22", "amara22BEN", "AMLT2022", "amaML2021", "amara2021B")
+
+projects = projects[projects$project_code %in% p, ]
+
+
 # make a data.frame with project name, userowner, API key and server
 # but not save it, to keep the API key confidential
-serverdata = projects[,c("project_id", "user_owner", "server")]
+serverdata = projects[,c("project_id",  "project_code", "user_owner", "server")]
+
+
 
 # fetch the data from climmob
 cmdata = list()
@@ -38,7 +46,7 @@ cmdata = list()
 for(i in seq_along(projects$project_id)) {
 
   d_i = getDataCM(key,
-                  project = serverdata$project_id[i],
+                  project = serverdata$project_code[i],
                   userowner = serverdata$user_owner[i],
                   server = serverdata$server[i],
                   as.data.frame = FALSE)
@@ -179,10 +187,18 @@ plot_map(lonlat, c("longitude", "latitude"),
          map_provider = "OpenStreetMap.Mapnik")
 
 
-dat = cbind(lonlat, dat)
+coords = rmGeoIdentity(longlat = lonlat)
 
+head(coords)
 
-keep = !grepl("gps_precision|elevation", names(dat))
+plot_map(coords, c("long", "lat"),
+         map_provider = "OpenStreetMap.Mapnik")
+
+names(coords) = c("longitude", "latitude")
+
+dat = cbind(dat, coords)
+
+keep = !grepl("gps_precision|elevation|participant_name", names(dat))
 
 dat = dat[keep]
 
@@ -198,6 +214,11 @@ covar = lapply(dat[covar], function(x){
 covar = do.call("rbind", covar)
 
 write.csv(covar, "data/summaries/covar-available.csv")
+
+
+names(dat)
+
+
 
 # save dat as csv file. 
 #write_excel_csv(dat, file = "data/amaranth-tricot-data.csv")
