@@ -8,9 +8,18 @@ library("ggfortify")
 library("gosset")
 library("PlackettLuce")
 library("ClimMobTools")
+library("sf")
+library(lwgeom)
 source("https://raw.githubusercontent.com/AgrDataSci/ClimMob-analysis/master/modules/01_functions.R")
 #source("/Users/kauedesousa/Library/Mobile Documents/com~apple~CloudDocs/Work/Rcode/ClimMob-analysis/modules/01_functions.R")
 source("script/helper-01-function.R")
+
+s1 = st_read("data/c3_2/", "aeco", crs = 4326)
+s1 = st_make_valid(s1)
+
+s2 = st_read("data/_Zones_Agroclimatiques_de_Mali/", "_Zones_Agroclimatiques_de_Mali", crs = 4326)
+s2 = st_make_valid(s2)
+
 
 # .......................................
 # .......................................
@@ -106,6 +115,30 @@ table(covar$Cluster, covar$whocontrolprod)
 
 table(covar$Cluster, covar$whocontrolsell)
 
+#...............
+# coordinates #####
+coord = dat[,c("longitude", "latitude")]
+repl = rowSums(is.na(coord))
+coord[is.na(coord)] = 0
+coord = st_as_sf(coord, coords = c("longitude", "latitude"), crs = 4326)
+
+s1 = st_join(coord, s1,  join = st_intersects)
+
+table(s1$AECO_NAME)
+
+dat$agroeco = s1$AECO_NAME
+
+dat$agroeco[dat$agroeco == "Zone de la Dépression"] = "Zone des Pêcheries"
+
+dat$agroeco[dat$agroeco == "Zone Extrême Nord Bénin"] = "Guinea Savanna"
+
+dat$agroeco[dat$package_country == "ML"] = "Guinea Savanna"
+
+dat$agroeco[dat$package_country == "TZ"] = "Southern"
+
+table(dat$agroeco)
+
+
 # ........................................
 # .......................................
 # PCA with log-worth  ####
@@ -138,19 +171,17 @@ table(split)
 # this will check whether the ranks are significantly distinct 
 # from each group
 llr = lapply(R, function(x){
-  likelihood_ratio(x, split = split)
+  try(likelihood_ratio(x, split = split), silent = TRUE)
 })
 
 
-for(i in seq_along(R)){
-  likelihood_ratio(R[[i]], split = split)
-}
+llr_index = which(unlist(lapply(llr, function(x)class(x)[1])) != "try-error")
 
-llr = do.call("rbind", llr)
+llr = do.call("rbind", llr[llr_index])
 
-llr$trait = labels
+llr$trait = labels[llr_index]
 llr
-write.csv(llr, "output/likelihood-ratio-clusters.csv")
+write.csv(llr, "output/likelihood-ratio-clusters-22.csv")
 
 # PL model
 mod = lapply(R, PlackettLuce)
@@ -197,25 +228,30 @@ ggsave("output/biplot-performance-all-traits.pdf",
 # PCA segmented by gender and regions ####
 # first fit a PL tree to see if gender influences 
 # variety performance
-gender_class = table(covar$Cluster)
+var = dat$package_country
+gender_class = table(var)
 gender_class
 plots_gender = list()
 
 for (i in seq_along(gender_class)) {
   
   R_subset = lapply(R, function(x){
-    x = x[covar$Cluster == names(gender_class[i])]
-    na.omit(x)
+    x = x[var == names(gender_class[i])]
+    #na.omit(x)
   })
   
   R_subset
   
-  mod = lapply(R_subset, PlackettLuce)
+  mod = lapply(R_subset, function(x) try(PlackettLuce(x), silent = TRUE))
   
   # get probabilities
   coeffs = lapply(mod, function(x){
-    resample(x, bootstrap = TRUE, seed = 1424, n1 = 5) 
+    x = try(resample(x, bootstrap = TRUE, seed = 1423, n1 = 5), silent = TRUE)
   })
+  
+  index = which(unlist(lapply(coeffs, function(x)class(x)[1])) != "try-error")
+  
+  coeffs = coeffs[index]
   
   coeffs = do.call(cbind, coeffs)
   
@@ -223,8 +259,10 @@ for (i in seq_along(gender_class)) {
   
   coeffs = coeffs[-rmv]
   
-  names(coeffs)[-1] = labels
+  names(coeffs)[-1] = labels[index]
 
+  traitlabels = labels[index]
+  
   pc = princomp(coeffs[, -1], cor = TRUE)
   
   pcplot = plot_pca(pc, scale = 6) + 
@@ -240,7 +278,7 @@ for (i in seq_along(gender_class)) {
 }
 
 p = plots_gender[[1]] + plots_gender[[2]] + 
-  plots_gender[[3]] + plots_gender[[4]]
+  plots_gender[[3]]
 
 p
 

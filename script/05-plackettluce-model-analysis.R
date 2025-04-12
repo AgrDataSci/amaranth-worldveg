@@ -62,8 +62,8 @@ r = rank_tricot(net, pack_index, c("best", "worst"))
 plot(network(r))
 
 pdf(file = "output/trial-network.pdf",
-    width = 9,
-    height = 9)
+    width = 7,
+    height = 7)
 plot(network(r))
 dev.off()
 
